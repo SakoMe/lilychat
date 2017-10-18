@@ -1,14 +1,10 @@
 export default (sequelize, DataTypes) => {
-  const Group = sequelize.define(
-    'group',
-    {
-      name: {
-        type: DataTypes.STRING,
-        unique: true,
-      },
+  const Group = sequelize.define('group', {
+    name: {
+      type: DataTypes.STRING,
+      unique: true,
     },
-    { underscored: true },
-  );
+  });
 
   Group.associate = (models) => {
     Group.belongsToMany(models.User, {

@@ -2,10 +2,14 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
 import { makeExecutableSchema } from 'graphql-tools';
+import path from 'path';
+import { fileLoader, mergeTypes, mergeResolvers } from 'merge-graphql-schemas';
 
-import typeDefs from './schema';
-import resolvers from './resolvers';
 import models from './models';
+
+const typeDefs = mergeTypes(fileLoader(path.join(__dirname, './schemas')));
+
+const resolvers = mergeResolvers(fileLoader(path.join(__dirname, './resolvers')));
 
 const schema = makeExecutableSchema({
   typeDefs,
@@ -15,10 +19,19 @@ const schema = makeExecutableSchema({
 const app = express();
 const graphqlEndPoint = '/graphql';
 
-app.use(graphqlEndPoint, bodyParser.json(), graphqlExpress({ schema }));
+app.use(
+  graphqlEndPoint,
+  bodyParser.json(),
+  graphqlExpress({
+    schema,
+    context: {
+      models,
+    },
+  }),
+);
 
 app.use('/graphiql', graphiqlExpress({ endpointURL: graphqlEndPoint }));
 
 models.sequelize.sync({}).then(() => {
-  app.listen(8081);
+  app.listen(8080);
 });
